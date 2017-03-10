@@ -13,7 +13,7 @@ void isrCross(void);
 #define INDEX_RIGHT_HOOK   3
 #define INDEX_LEFT_UPCT    4
 #define INDEX_RIGHT_UPCT   5
-#define NB_TARGETS 1
+#define NB_TARGETS 2
 
 target targets[] = {
 		{ "jab", 0, 0, 2, isrJab, nullptr,  // name, stats, shift reg, int_pin, isr, accel obj
@@ -59,10 +59,9 @@ void isrCross() {
 }
 
 void talkToTarget(uint8_t targetShiftRegPin) {
-	Serial.println("[SETUP] Pull up all shift register outputs but the target's one ");
-		    digitalWrite(latchPin, LOW);
-		    shiftOut(dataPin, clockPin, MSBFIRST, ~(1 << targetShiftRegPin));
-		    digitalWrite(latchPin, HIGH);
+	digitalWrite(latchPin, LOW);
+	shiftOut(dataPin, clockPin, MSBFIRST, ~(1 << targetShiftRegPin));
+	digitalWrite(latchPin, HIGH);
 }
 
 void setup() {
@@ -106,7 +105,6 @@ void setup() {
 		Serial.println("[SETUP] Start accelerometer");
 		targets[i].accel->start();
 	}
-
 }
 
 
@@ -122,6 +120,7 @@ void checkHits() {
 			hitFlags &= ~(1 << i);
 
 			delay(150); // ori=200
+			talkToTarget(targets[i].shift_register_output_pin);
 			targets[i].accel->getIntSingleTapSource();
 		}
 	}
